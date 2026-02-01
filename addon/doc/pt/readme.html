@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendário Simples - Addon para NVDA</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 20px auto; padding: 0 20px; }
+        h1 { color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; }
+        h2 { color: #2980b9; margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        kbd { background: #f7f7f7; border: 1px solid #ccc; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-weight: bold; color: #444; box-shadow: 1px 1px 0 #ddd; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f4f4f4; color: #333; }
+        tr:nth-child(even) { background-color: #fafafa; }
+        ul { margin-bottom: 20px; }
+        li { margin-bottom: 8px; }
+        .note { background-color: #fff3cd; border-left: 5px solid #ffa502; padding: 15px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+    <h1>Calendário Simples</h1>
+    <p>Este complemento oferece um calendário acessível, rápido e cheio de recursos para usuários do NVDA. Além de navegar pelas datas, você pode gerenciar notas, consultar fases da lua, verificar feriados e calcular dias restantes para o fim do ano.</p>
+
+    <h2>Como Abrir</h2>
+    <p>Para abrir o calendário a partir de qualquer lugar no Windows:</p>
+    <ul>
+        <li>Pressione: <kbd>NVDA</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd></li>
+    </ul>
+    <p>Você também pode encontrá-lo no menu <strong>Ferramentas</strong> do NVDA.</p>
+
+    <h2>Teclas de Navegação</h2>
+    <p>Use estas teclas para se mover pelo calendário:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 40%;">Tecla</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><kbd>Seta Esquerda</kbd> / <kbd>Direita</kbd></td>
+                <td>Dia anterior / Dia seguinte.</td>
+            </tr>
+            <tr>
+                <td><kbd>Seta Cima</kbd> / <kbd>Baixo</kbd></td>
+                <td>Semana anterior / Próxima semana.</td>
+            </tr>
+            <tr>
+                <td><kbd>Page Up</kbd> / <kbd>Page Down</kbd></td>
+                <td>Mês anterior / Próximo mês.</td>
+            </tr>
+            <tr>
+                <td><kbd>Home</kbd></td>
+                <td>Vai para o <strong>primeiro dia</strong> do mês atual.</td>
+            </tr>
+            <tr>
+                <td><kbd>End</kbd></td>
+                <td>Vai para o <strong>último dia</strong> do mês atual.</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd> + <kbd>Home</kbd></td>
+                <td>Recua um ano.</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd> + <kbd>End</kbd></td>
+                <td>Avança um ano.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Comandos e Ferramentas</h2>
+    <p>Com o calendário aberto, utilize as teclas abaixo para acessar funções rápidas (não é necessário pressionar Ctrl):</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 20%;">Tecla</th>
+                <th>Função</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><kbd>H</kbd></td>
+                <td><strong>Hoje:</strong> Vai imediatamente para a data atual.</td>
+            </tr>
+            <tr>
+                <td><kbd>G</kbd></td>
+                <td><strong>Ir para Data:</strong> Abre uma caixa para digitar uma data específica (ex: 25/12/2025).</td>
+            </tr>
+            <tr>
+                <td><kbd>F</kbd></td>
+                <td><strong>Fases da Lua:</strong> Anuncia a fase da lua atual e o período (data de início e fim da fase).</td>
+            </tr>
+            <tr>
+                <td><kbd>D</kbd></td>
+                <td><strong>Dias Restantes:</strong> Informa quantos dias faltam para terminar o ano.</td>
+            </tr>
+            <tr>
+                <td><kbd>L</kbd></td>
+                <td><strong>Lista de Feriados:</strong> Exibe uma lista com todos os feriados fixos e móveis do ano selecionado.</td>
+            </tr>
+            <tr>
+                <td><kbd>C</kbd></td>
+                <td><strong>Copiar:</strong> Copia a data selecionada para a área de transferência.</td>
+            </tr>
+            <tr>
+                <td><kbd>Enter</kbd></td>
+                <td><strong>Notas:</strong> Abre um campo para adicionar ou editar uma nota pessoal para o dia selecionado.</td>
+            </tr>
+            <tr>
+                <td><kbd>F1</kbd></td>
+                <td>Exibe a ajuda rápida dentro do programa.</td>
+            </tr>
+            <tr>
+                <td><kbd>Esc</kbd></td>
+                <td>Fecha o calendário.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="note">
+        <strong>Dica:</strong> O calendário emite sons diferentes para ajudar na orientação. Um bipe agudo indica que você passou pelo dia de hoje.
+    </div>
+
+    <hr>
+    <p><strong>Desenvolvido por:</strong> Leandro Souza</p>
+    <p><strong>Website:</strong> <a href="https://www.openbible.com.br/">https://www.openbible.com.br/</a></p>
+
+</body>
+</html>

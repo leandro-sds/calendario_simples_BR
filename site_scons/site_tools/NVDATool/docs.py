@@ -1,8 +1,29 @@
 
 import gettext
 from pathlib import Path
+try:
+	import markdown as _markdown
+except Exception:  # pragma: no cover
+	_markdown = None
 
-import markdown
+def _renderMarkdown(mdText: str, mdExtensions: list[str]) -> str:
+	"""Render Markdown to HTML.
+
+	The official template uses the 'markdown' package (Python-Markdown).
+	For local builds where it isn't installed, we fall back gracefully:
+	- Try 'markdown2' if available
+	- Otherwise, wrap plain text in a <pre> block
+	"""
+	if _markdown is not None:
+		return _markdown.markdown(mdText, extensions=mdExtensions)
+
+	try:
+		import markdown2  # type: ignore
+		# markdown2 uses different extension naming; keep extras empty if unknown.
+		return str(markdown2.markdown(mdText))
+	except Exception:
+		import html
+		return f"<pre>{html.escape(mdText)}</pre>"
 
 from .typings import AddonInfo
 
@@ -41,7 +62,7 @@ def md2html(
 		mdText = f.read()
 	for k, v in headerDic.items():
 		mdText = mdText.replace(k, v, 1)
-	htmlText = markdown.markdown(mdText, extensions=mdExtensions)
+	htmlText = _renderMarkdown(mdText, mdExtensions)
 	# Optimization: build resulting HTML text in one go instead of writing parts separately.
 	docText = "\n".join(
 		(

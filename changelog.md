@@ -1,1 +1,6 @@
-Use this file to explain what has changed in your add-on since the previous release. This will be included automatically in the release description when used with GitHub actions.
+# Changelog
+
+## 2026.02.01
+- Primeira versão pública do Calendário Simples BR.
+- Item no menu Ferramentas.
+- Atalho `NVDA+Shift+C` para abrir o calendário.

@@ -14,7 +14,7 @@ builtins = [
 
 include = [
 	"*.py",
-	"sconstruct",
+	"SConstruct",
 ]
 
 exclude = [
@@ -37,7 +37,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 # sconstruct contains many inbuilt functions not recognised by the lint,
 # so ignore F821.
-"sconstruct" = ["F821"]
+"SConstruct" = ["F821"]
 
 [tool.pyright]
 pythonPlatform = "Windows"
@@ -48,7 +48,7 @@ include = [
 ]
 
 exclude = [
-	"sconstruct",
+	"SConstruct",
 	".git",
 	"__pycache__",
 	# When excluding concrete paths relative to a directory,

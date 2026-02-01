@@ -1,7 +1,5 @@
 addon/doc/*.css
-addon/doc/en/
 *_docHandler.py
-*.html
 manifest.ini
 *.mo
 *.pot
@@ -9,3 +7,5 @@ manifest.ini
 *.nvda-addon
 .sconsign.dblite
 /[0-9]*.[0-9]*.[0-9]*.json
+addon/doc/style.css
+addon/doc/*/readme.md
