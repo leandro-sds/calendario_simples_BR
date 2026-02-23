@@ -15,7 +15,7 @@ addon_info = AddonInfo(
 		Permite navegar por dias, semanas, meses e anos com atalhos de teclado, anunciando as datas de forma clara e rápida."""
 	),
 	# Version (major.minor.patch) - required by the NV Access add-on store
-	addon_version="2026.02.01",
+	addon_version="2026.02.23",
 	# Translators: what's new content for the add-on version to be shown in the add-on store
 	addon_changelog=_(
 		"""Primeira versão pública do Calendário Simples BR.
@@ -26,7 +26,7 @@ addon_info = AddonInfo(
 	addon_sourceURL="https://github.com/leandro-sds/calendario_simples_BR",
 	addon_docFileName="readme.html",
 	addon_minimumNVDAVersion="2024.1",
-	addon_lastTestedNVDAVersion="2025.3.2",
+	addon_lastTestedNVDAVersion="2025.3.3",
 	addon_updateChannel=None,
 	addon_license="GPL-2.0-only",
 	addon_licenseURL=None,
