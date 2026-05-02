@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.05.02
+## 2026.05.03
 - Atualizada a compatibilidade com NVDA 2026.1
 
 ## 2026.02.23

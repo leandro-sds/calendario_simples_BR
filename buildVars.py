@@ -15,7 +15,7 @@ addon_info = AddonInfo(
 		Permite navegar por dias, semanas, meses e anos com atalhos de teclado, anunciando as datas de forma clara e rápida."""
 	),
 	# Version (major.minor.patch) - required by the NV Access add-on store
-	addon_version="2026.05.02",
+	addon_version="2026.05.03",
 	# Translators: what's new content for the add-on version to be shown in the add-on store
 	addon_changelog=_(
 		"""Um calendário simples e com feriados e datas comemorativas do Brasil.
