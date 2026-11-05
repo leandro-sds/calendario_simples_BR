@@ -19,7 +19,7 @@ addon_info = AddonInfo(
 	# Translators: what's new content for the add-on version to be shown in the add-on store
 	addon_changelog=_(
 		"""Um calendário simples e com feriados e datas comemorativas do Brasil.
-		Inclui item no menu Ferramentas e atalho NVDA+Shift+C para abrir o calendário."""
+		Inclui item no menu Ferramentas e atalho NVDA+Shift+Alt+C para abrir o calendário."""
 	),
 	addon_author="Leandro Souza",
 	addon_url="https://github.com/leandro-sds/calendario_simples_BR/",

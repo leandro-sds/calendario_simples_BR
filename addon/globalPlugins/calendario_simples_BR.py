@@ -617,7 +617,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
     @script(
         description="Abrir Calendário Simples BR",
         category="Calendário Simples BR",
-        gesture="kb:NVDA+shift+c",
+        gesture="kb:NVDA+shift+alt+c",
     )
     def script_openCalendar(self, gesture):
         self.openCalendar()

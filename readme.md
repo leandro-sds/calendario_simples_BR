@@ -2,7 +2,7 @@
 
 Complemento do **NVDA** que oferece um calendário simples e acessível, com navegação rápida e anúncios claros de data.
 
-- **Atalho principal:** `NVDA+Shift+C` (abre o Calendário Simples BR)
+- **Atalho principal:** `NVDA+Shift+Alt+C` (abre o Calendário Simples BR)
 - Também disponível em **NVDA → Ferramentas → Calendário Simples BR**
 
 ## Recursos
