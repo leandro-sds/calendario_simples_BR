@@ -12,14 +12,14 @@ addon_info = AddonInfo(
 	# Translators: Long description to be shown for this add-on in the add-on store
 	addon_description=_(
 		"""Este complemento oferece um calendário simples e acessível para o NVDA.
-		Permite navegar por dias, semanas, meses e anos com atalhos de teclado, anunciando as datas de forma clara e rápida."""
+		Permite navegar por datas e contar dias corridos, úteis e de fim de semana entre duas datas."""
 	),
 	# Version (major.minor.patch) - required by the NV Access add-on store
-	addon_version="2026.05.03",
+	addon_version="2026.05.04",
 	# Translators: what's new content for the add-on version to be shown in the add-on store
 	addon_changelog=_(
-		"""Um calendário simples e com feriados e datas comemorativas do Brasil.
-		Inclui item no menu Ferramentas e atalho NVDA+Shift+C para abrir o calendário."""
+		"""Adiciona contagem de dias entre datas marcadas no calendário, inclusive retroativa,
+		com ajuste dos resultados e anúncio da data final."""
 	),
 	addon_author="Leandro Souza",
 	addon_url="https://github.com/leandro-sds/calendario_simples_BR/",

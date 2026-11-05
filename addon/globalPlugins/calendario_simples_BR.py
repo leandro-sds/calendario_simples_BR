@@ -67,6 +67,99 @@ def get_feriados_moveis(ano):
     }
 
 
+def calcular_intervalo(inicio, fim):
+    """Conta datas inclusivamente, com feriados de referência brasileiros."""
+    if not (2000 <= inicio.year <= 2099 and 2000 <= fim.year <= 2099):
+        raise ValueError("Informe datas entre 2000 e 2099.")
+    inicio, fim = sorted((inicio, fim))
+    total = (fim - inicio).days + 1
+    semanas, resto = divmod(total, 7)
+    dias_semana = [semanas + (1 if (dia - inicio.weekday()) % 7 < resto else 0) for dia in range(7)]
+    feriados = []
+    for ano in range(inicio.year, fim.year + 1):
+        for (dia, mes), nome in FERIADOS_FIXOS.items():
+            if (dia, mes) == (20, 11) and ano < 2024:
+                continue
+            data = datetime.date(ano, mes, dia)
+            if inicio <= data <= fim:
+                feriados.append((data, nome))
+        for data, nome in get_feriados_moveis(ano).items():
+            if nome == "Páscoa":
+                continue
+            if inicio <= data <= fim:
+                feriados.append((data, nome))
+    feriados.sort()
+    fim_semana = dias_semana[5] + dias_semana[6]
+    feriados_em_dias_uteis = sum(data.weekday() < 5 for data, _ in feriados)
+    return {
+        "total": total,
+        "dias_semana": dias_semana,
+        "fim_semana": fim_semana,
+        "feriados": feriados,
+        "feriados_em_dias_uteis": feriados_em_dias_uteis,
+        "uteis": total - fim_semana - feriados_em_dias_uteis,
+    }
+
+
+def buscar_data_por_quantidade(inicio, fim_atual, campo, quantidade, direcao=1):
+    """Encontra a data mais próxima na direção do ajuste, com início fixo."""
+    if campo not in ("total", "uteis", "fim_semana"):
+        raise ValueError("Tipo de contagem inválido.")
+    if direcao not in (-1, 1) or (fim_atual - inicio).days * direcao < 0:
+        raise ValueError("Direção de contagem inválida.")
+    limite = datetime.date(2099, 12, 31) if direcao == 1 else datetime.date(2000, 1, 1)
+    atual = calcular_intervalo(inicio, fim_atual)[campo]
+    minimo = calcular_intervalo(inicio, inicio)[campo]
+    maximo = calcular_intervalo(inicio, limite)[campo]
+    if not minimo <= quantidade <= maximo:
+        raise ValueError("Quantidade fora do intervalo possível para esta data inicial.")
+    if quantidade == atual:
+        return fim_atual
+    baixo, alto = 0, abs((limite - inicio).days)
+    if quantidade > atual:
+        while baixo < alto:
+            meio = (baixo + alto) // 2
+            if calcular_intervalo(inicio, inicio + datetime.timedelta(days=direcao * meio))[campo] < quantidade:
+                baixo = meio + 1
+            else:
+                alto = meio
+    else:
+        while baixo < alto:
+            meio = (baixo + alto + 1) // 2
+            if calcular_intervalo(inicio, inicio + datetime.timedelta(days=direcao * meio))[campo] > quantidade:
+                alto = meio - 1
+            else:
+                baixo = meio
+    return inicio + datetime.timedelta(days=direcao * baixo)
+
+
+def formatar_intervalo(inicio, fim, resultado, direcao=1):
+    linhas = [
+        "Início: {}. Fim: {}. Ambas as datas incluídas.".format(formato_data_pt(inicio), formato_data_pt(fim)),
+        "Direção: {}.".format("retroativa" if direcao < 0 else "progressiva"),
+        "Dias corridos: {}".format(resultado["total"]),
+        "Dias úteis: {}".format(resultado["uteis"]),
+        "Dias de fim de semana: {}".format(resultado["fim_semana"]),
+        "Feriados e datas consideradas: {} ({} em dias de semana)".format(
+            len(resultado["feriados"]), resultado["feriados_em_dias_uteis"]
+        ),
+        "", "Dias por dia da semana:",
+    ]
+    linhas.extend("{}: {}".format(nome, quantidade) for nome, quantidade in zip(DIAS_SEMANA, resultado["dias_semana"]))
+    linhas.extend(["", "Feriados e datas consideradas no período:"])
+    if resultado["feriados"]:
+        linhas.extend("{}: {}".format(formato_data_pt(data), nome) for data, nome in resultado["feriados"])
+    else:
+        linhas.append("Nenhum.")
+    linhas.extend([
+        "", "Dias úteis: segunda a sexta, excluindo as datas listadas que caem nesses dias.",
+        "Considera os feriados nacionais e a Sexta-feira Santa; não considera feriados estaduais ou municipais.",
+        "Terça-feira de Carnaval e Corpus Christi estão incluídos; sua observância varia por localidade e instituição.",
+        "Confira as regras da sua localidade e da instituição antes de usar o resultado para prazos.",
+    ])
+    return "\n".join(linhas)
+
+
 def get_fase_lua_nome(data_dt):
     """Calcula a fase da lua simplificada (Nova, Crescente, Cheia, Minguante)."""
     # Referência: Lua Nova em 6 de Janeiro de 2000
@@ -170,6 +263,81 @@ class ListaFeriadosDialog(wx.Dialog):
             evt.Skip()
 
 
+class ContagemDiasDialog(wx.Dialog):
+    """Ajusta o fim do intervalo a partir das contagens inclusivas."""
+
+    def __init__(self, parent, inicio, fim):
+        super(ContagemDiasDialog, self).__init__(parent, title="Contagem de dias", size=(650, 650))
+        self.inicio, self.fim = inicio, fim
+        self.direcao = -1 if fim < inicio else 1
+        self.atualizando = False
+        self.anuncio_pendente = None
+        panel = wx.Panel(self)
+        layout = wx.BoxSizer(wx.VERTICAL)
+        layout.Add(wx.StaticText(panel, label="Início: {}".format(formato_data_pt(inicio))), 0, wx.ALL, 10)
+        self.data_final = wx.StaticText(panel, label="")
+        layout.Add(self.data_final, 0, wx.ALL, 10)
+        self.campos = {}
+        limite = datetime.date(2000, 1, 1) if self.direcao == -1 else datetime.date(2099, 12, 31)
+        maximos = calcular_intervalo(inicio, limite)
+        minimos = calcular_intervalo(inicio, inicio)
+        for chave, nome in (("uteis", "Dias úteis"), ("total", "Dias corridos"), ("fim_semana", "Dias de fim de semana")):
+            layout.Add(wx.StaticText(panel, label=nome + ":"), 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+            controle = wx.SpinCtrl(panel, min=minimos[chave], max=maximos[chave], initial=minimos[chave], style=wx.SP_ARROW_KEYS)
+            controle.SetName(nome)
+            self.campos[chave] = controle
+            layout.Add(controle, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+            controle.Bind(wx.EVT_SPINCTRL, lambda evento, campo=chave: self.on_alterar(evento, campo, False))
+            controle.Bind(wx.EVT_TEXT, lambda evento, campo=chave: self.on_alterar(evento, campo, True))
+        layout.Add(wx.StaticText(panel, label="Detalhes do intervalo:"), 0, wx.LEFT | wx.RIGHT, 10)
+        self.resultado = wx.TextCtrl(panel, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_BESTWRAP)
+        self.resultado.SetName("Detalhes do intervalo")
+        layout.Add(self.resultado, 1, wx.EXPAND | wx.ALL, 10)
+        fechar = wx.Button(panel, wx.ID_OK, label="Fechar")
+        layout.Add(fechar, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        panel.SetSizer(layout)
+        self.atualizar_resultados()
+        self.campos["uteis"].SetFocus()
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.on_destroy)
+
+    def atualizar_resultados(self):
+        resultado = calcular_intervalo(self.inicio, self.fim)
+        self.atualizando = True
+        try:
+            for chave, controle in self.campos.items():
+                controle.SetValue(resultado[chave])
+            self.data_final.SetLabel("Fim: {}".format(formato_data_pt(self.fim)))
+            self.resultado.ChangeValue(formatar_intervalo(self.inicio, self.fim, resultado, self.direcao))
+        finally:
+            self.atualizando = False
+
+    def on_alterar(self, event, campo, texto_editado):
+        if self.atualizando:
+            return
+        try:
+            quantidade = int(event.GetString().strip()) if texto_editado else self.campos[campo].GetValue()
+            nova_data = buscar_data_por_quantidade(self.inicio, self.fim, campo, quantidade, self.direcao)
+        except (ValueError, OverflowError):
+            return
+        if nova_data == self.fim:
+            return
+        self.fim = nova_data
+        self.atualizar_resultados()
+        if self.anuncio_pendente:
+            self.anuncio_pendente.Stop()
+        self.anuncio_pendente = wx.CallLater(500, self.anunciar_data)
+
+    def anunciar_data(self):
+        self.anuncio_pendente = None
+        ui.message("Data final: {}".format(formato_data_pt(self.fim)))
+
+    def on_destroy(self, event):
+        if event.GetEventObject() is self and self.anuncio_pendente:
+            self.anuncio_pendente.Stop()
+            self.anuncio_pendente = None
+        event.Skip()
+
+
 class CalendarioFrame(wx.Frame):
     def __init__(self, parent=None):
         style = wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP
@@ -177,6 +345,8 @@ class CalendarioFrame(wx.Frame):
 
         self.today = datetime.date.today()
         self.currentDate = self.today
+        self.inicio_contagem = None
+        self.fim_contagem = None
         self.dia_labels = []
 
         self.notas = self.carregar_notas()
@@ -443,6 +613,35 @@ class CalendarioFrame(wx.Frame):
         dlg.Destroy()
         self.panel.SetFocus()
 
+    def limpar_contagem(self):
+        self.inicio_contagem = None
+        self.fim_contagem = None
+        ui.message("Seleção de datas da contagem limpa.")
+
+    def marcar_data_contagem(self, final=False):
+        data = self.currentDate
+        if not 2000 <= data.year <= 2099:
+            ui.message("A contagem aceita datas entre 2000 e 2099.")
+            return
+        if not final:
+            self.inicio_contagem = data
+            self.fim_contagem = None
+            ui.message("Início marcado: {}. Marque o fim com Shift U.".format(formato_data_pt(data)))
+            return
+        if self.inicio_contagem is None:
+            ui.message("Marque primeiro a data inicial com U.")
+            return
+        self.fim_contagem = data
+        dlg = ContagemDiasDialog(self, self.inicio_contagem, self.fim_contagem)
+        try:
+            dlg.ShowModal()
+            self.fim_contagem = dlg.fim
+            self.currentDate = dlg.fim
+            self.update_ui()
+        finally:
+            dlg.Destroy()
+            self.panel.SetFocus()
+
     def mostrar_ajuda(self):
         texto_ajuda = (
             "--- Atalhos do Calendário ---\n\n"
@@ -461,7 +660,10 @@ class CalendarioFrame(wx.Frame):
             "- H: Ir para a data atual (Hoje)\n"
             "- C: Copiar data para área de transferência\n"
             "- D: Anunciar dias restantes para o fim do ano\n"
-            "- L: Listar todos os feriados do ano\n\n"
+            "- L: Listar todos os feriados do ano\n"
+            "- U: Marcar data inicial da contagem\n"
+            "- Shift+U: Marcar data final e abrir a contagem\n"
+            "- Ctrl+U: Limpar as datas marcadas\n\n"
             "Geral:\n"
             "- F1: Exibir esta ajuda (use setas para ler)\n"
             "- Esc: Fechar calendário ou ajuda"
@@ -489,6 +691,10 @@ class CalendarioFrame(wx.Frame):
         moveis = get_feriados_moveis(self.currentDate.year)
 
         extra_info = []
+        if self.currentDate == self.inicio_contagem:
+            extra_info.append("Início")
+        if self.currentDate == self.fim_contagem:
+            extra_info.append("Fim")
 
         if chave_fixa in FERIADOS_FIXOS:
             extra_info.append("Feriado: {}".format(FERIADOS_FIXOS[chave_fixa]))
@@ -535,6 +741,13 @@ class CalendarioFrame(wx.Frame):
             self.anunciar_fase_lua_detalhada()
         elif code in (ord("L"), ord("l")) and not evt.ControlDown() and not evt.AltDown():
             self.mostrar_lista_feriados()
+        elif code in (ord("U"), ord("u")) and not evt.AltDown():
+            if evt.ControlDown() and not evt.ShiftDown():
+                self.limpar_contagem()
+            elif not evt.ControlDown():
+                self.marcar_data_contagem(final=evt.ShiftDown())
+            else:
+                evt.Skip()
         elif code == wx.WXK_LEFT:
             self.move_safe(-1)
         elif code == wx.WXK_RIGHT:
